@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#080b18">
+<title>INTELLENZA 2K26 | AI Receptionist</title>
+<style>
+:root{color-scheme:dark;--bg:#080b18;--cyan:#62eaff;--muted:#a9b7d4}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;font-family:system-ui,sans-serif;color:white;background:radial-gradient(ellipse at 50% 0%,#253c70 0%,transparent 55%),var(--bg)}
+main{width:min(760px,100%);margin:auto;padding:22px 16px 40px}
+header{text-align:center}.tag{color:var(--cyan);font-size:12px;letter-spacing:4px;font-weight:800}
+h1{font-size:clamp(26px,6vw,42px);margin:10px 0}.sub{color:var(--muted);margin:0}
+.robot{width:156px;height:156px;border-radius:42px;margin:28px auto 16px;display:grid;place-items:center;background:linear-gradient(145deg,#202d50,#11162a);border:1px solid #5877a8;box-shadow:0 0 45px #3adfff30;animation:float 3s ease-in-out infinite}
+.face{display:flex;gap:24px}.eye{width:25px;height:38px;border-radius:18px;background:var(--cyan);box-shadow:0 0 20px #62eaffaa}
+.robot.talking .eye{animation:blink .45s infinite alternate}
+@keyframes float{50%{transform:translateY(-7px)}}@keyframes blink{to{height:12px}}
+.status{text-align:center;color:var(--cyan);min-height:24px}
+.panel{background:#121a30ef;border:1px solid #30415f;border-radius:22px;padding:18px;margin-top:18px}
+.answer{min-height:86px;line-height:1.65;color:#edf4ff;white-space:pre-wrap}
+button,input{font:inherit;border-radius:13px}button{border:0;padding:13px 16px;cursor:pointer;font-weight:750}
+.primary{color:#06101d;background:var(--cyan)}.secondary{color:white;background:#263653;border:1px solid #405578}
+.controls{display:flex;gap:10px;flex-wrap:wrap}.controls button{flex:1;min-width:125px}
+form{display:flex;gap:8px;margin-top:12px}input{min-width:0;flex:1;padding:13px;color:white;background:#080f20;border:1px solid #405578}
+.facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.fact{background:#1b2742;padding:14px;border-radius:14px}.fact strong{display:block;color:var(--cyan);margin-bottom:5px}
+small,footer{color:var(--muted);line-height:1.6}footer{text-align:center;margin-top:22px;font-size:12px}
+@media(max-width:420px){.facts{grid-template-columns:1fr}.robot{width:132px;height:132px}}
+</style>
+</head>
+<body>
+<main>
+<header><div class="tag">SHREENIVASA ENGINEERING COLLEGE</div><h1>INTELLENZA <span style="color:var(--cyan)">2K26</span></h1><p class="sub">Your AI-powered symposium receptionist</p></header>
+<div class="robot" id="robot" aria-label="Animated robot"><div class="face"><div class="eye"></div><div class="eye"></div></div></div>
+<div class="status" id="status">Receptionist ready</div>
+<section class="panel">
+<div class="controls"><button class="primary" id="listen">🎙️ Ask by voice</button><button class="secondary" id="welcome">🔊 Welcome message</button><button class="secondary" id="stop">■ Stop speaking</button></div>
+<div class="answer" id="answer" aria-live="polite">Welcome to INTELLENZA 2K26! I'm your digital receptionist. Ask me about our events, fees, workshop or venue.</div>
+<form id="questionForm"><input id="question" placeholder="Type your question..." autocomplete="off"><button class="primary" type="submit">Ask</button></form>
+<p><small>Voice recognition depends on browser support and may require internet. Typing works as a fallback.</small></p>
+</section>
+<section class="panel"><h2>Event information</h2><div class="facts">
+<div class="fact"><strong>14 October 2026</strong>Technical symposium</div><div class="fact"><strong>15 October 2026</strong>Trends in Cybersecurity workshop</div>
+<div class="fact"><strong>₹250</strong>Symposium registration</div><div class="fact"><strong>₹200</strong>Workshop registration</div><div class="fact"><strong>₹400</strong>Both days</div><div class="fact"><strong>Seminar Hall</strong>Shreenivasa Engineering College</div>
+</div><p><small>Previously announced registration deadline: 12 October 2026. Confirm current registration availability with the organizers.</small></p></section>
+<footer>INTELLENZA 2K26 · Free browser-based prototype<br>Answers come from programmed event information, not a generative AI model.</footer>
+</main>
+<script>
+const $=id=>document.getElementById(id),answer=$("answer"),statusText=$("status"),robot=$("robot");
+function speak(text){
+ if(!("speechSynthesis"in window)){statusText.textContent="Speech playback unavailable. Read the answer on screen.";return}
+ speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.lang="en-IN";u.rate=.95;u.pitch=1.05;
+ u.onstart=()=>{statusText.textContent="Speaking...";robot.classList.add("talking")};
+ u.onend=()=>{statusText.textContent="Receptionist ready";robot.classList.remove("talking")};
+ u.onerror=()=>{statusText.textContent="Speech stopped or unavailable";robot.classList.remove("talking")};speechSynthesis.speak(u)
+}
+function reply(question){
+ const q=question.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu," ");let text;
+ if(/\b(hello|hi|hey|vanakkam)\b/.test(q))text="Hello! Welcome to INTELLENZA 2K26. How can I help you?";
+ else if(q.includes("workshop")&&/(fee|cost|price|how much|amount)/.test(q))text="The announced workshop fee is 200 rupees.";
+ else if(q.includes("symposium")&&/(fee|cost|price|how much|amount)/.test(q))text="The announced symposium fee is 250 rupees.";
+ else if(/(both|two days|2 days|two day)/.test(q)&&/(fee|cost|price|how much|amount|register)/.test(q))text="The announced combined fee for both days is 400 rupees.";
+ else if(/(fee|cost|price|how much|amount)/.test(q))text="The announced fees are 250 rupees for the symposium, 200 rupees for the workshop, and 400 rupees for both days.";
+ else if(q.includes("when")||q.includes("date")||q.includes("schedule")||q.includes("timing"))text="The technical symposium is on 14 October 2026. The Trends in Cybersecurity workshop is on 15 October 2026. Please contact the organizers for exact session timings.";
+ else if(q.includes("where")||q.includes("venue")||q.includes("location"))text="The announced venue for the workshop is the Seminar Hall at Shreenivasa Engineering College. Please follow the college's event directions for the symposium venue.";
+ else if(q.includes("cybersecurity")||q.includes("cyber security"))text="The workshop on 15 October is titled Trends in Cybersecurity. The announced venue is the Seminar Hall at Shreenivasa Engineering College.";
+ else if(q.includes("register")||q.includes("registration")||q.includes("qr"))text="The previously announced registration deadline was 12 October 2026. Please check with the event organizers to confirm whether registration is still open and obtain the official registration link.";
+ else if(q.includes("college")||q.includes("department"))text="INTELLENZA 2K26 is associated with Shreenivasa Engineering College. Please consult the official event announcement for department-specific details.";
+ else if(q.includes("thank"))text="You're welcome! Enjoy INTELLENZA 2K26.";
+ else if(q.includes("help")||q.includes("what can you do"))text="You can ask me about event dates, fees, the cybersecurity workshop, and the venue. You can also type your question below.";
+ else text="I don't have a verified answer for that yet. Please ask about event dates, fees, the cybersecurity workshop, or the venue, or contact an event organizer.";
+ answer.textContent=text;speak(text)
+}
+$("listen").addEventListener("click",()=>{
+ const R=window.SpeechRecognition||window.webkitSpeechRecognition;
+ if(!R){statusText.textContent="Voice recognition isn't supported here. Please type your question.";return}
+ const r=new R();r.lang="en-IN";r.continuous=false;r.interimResults=false;
+ r.onstart=()=>statusText.textContent="Listening... Speak now";
+ r.onresult=e=>{const q=e.results[0][0].transcript;$("question").value=q;reply(q)};
+ r.onerror=e=>statusText.textContent="Microphone issue: "+e.error+". Try typing instead.";
+ r.onend=()=>{if(statusText.textContent.startsWith("Listening"))statusText.textContent="Receptionist ready"};
+ try{r.start()}catch(e){statusText.textContent="Please wait a moment and try the microphone again."}
+});
+$("questionForm").addEventListener("submit",e=>{e.preventDefault();const q=$("question").value.trim();if(q)reply(q)});
+$("welcome").addEventListener("click",()=>speak("Welcome to INTELLENZA 2K26 at Shreenivasa Engineering College. I am your digital receptionist. Ask me about the symposium, the cybersecurity workshop, fees, or venue."));
+$("stop").addEventListener("click",()=>{if("speechSynthesis"in window)speechSynthesis.cancel();robot.classList.remove("talking");statusText.textContent="Speech stopped"});
+if(!("speechSynthesis"in window))statusText.textContent="Text mode available";
+</script>
+</body>
+</html>
